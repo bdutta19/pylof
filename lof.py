@@ -108,8 +108,15 @@ def k_distance(k, instance, instances, distance_function=distance_euclidean):
             distances[distance_value] = [instance2]
     distances = sorted(distances.items())
     neighbours = []
-    [neighbours.extend(n[1]) for n in distances[:k]]
-    return distances[k - 1][0], neighbours
+    k_sero = 0
+    k_dist = None
+    for dist in distances:
+        k_sero += len(dist[1])
+        neighbours.extend(dist[1])
+        k_dist = dist[0]
+        if k_sero >= k:
+            break
+    return k_dist, neighbours
 
 def reachability_distance(k, instance1, instance2, instances, distance_function=distance_euclidean):
     """The reachability distance of instance1 with respect to instance2.
@@ -127,7 +134,10 @@ def local_reachability_density(min_pts, instance, instances, **kwargs):
     reachability_distances_array = [0]*len(neighbours) #n.zeros(len(neighbours))
     for i, neighbour in enumerate(neighbours):
         reachability_distances_array[i] = reachability_distance(min_pts, instance, neighbour, instances, **kwargs) 
-    return len(neighbours) / sum(reachability_distances_array)
+    sum_reach_dist = sum(reachability_distances_array)
+    if sum_reach_dist == 0:
+        return float('inf')
+    return len(neighbours) / sum_reach_dist
 
 def local_outlier_factor(min_pts, instance, instances, **kwargs):
     """The (local) outlier factor of instance captures the degree to which we call instance an outlier.
